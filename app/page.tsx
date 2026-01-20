@@ -1,31 +1,27 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   return (
-    <main>
-      <section className="flex flex-col gap-4">
-        <h1 className="text-4xl font-bold">Welcome to the SaaS App Template</h1>
-        <h2 className="text-2xl font-bold">
-          Kickstart your next project with this fully featured template powered
-          by Next.js, Shadcn, Clerk, Supabase, and TailwindCSS.
+    <main className="container mx-auto py-16 px-4">
+      <section className="flex flex-col gap-6 max-w-4xl">
+        <h1 className="text-5xl font-bold">Welcome to DevManager</h1>
+        <h2 className="text-2xl font-semibold text-gray-700">
+          Your all-in-one platform for managing indie development projects from idea to production
         </h2>
-        <p>
-          This template serves as a solid foundation for your future SaaS
-          projects. To help you get started, we&apos;ve included a sample recipe
-          app as a practical example.
+        <p className="text-lg text-gray-600">
+          Track, manage, and monitor the apps you create with comprehensive metadata,
+          environment variables, deployment history, and more. Perfect for solo developers
+          and small teams building custom applications.
         </p>
-        <p>
-          Dive in and start building right away—or follow the step-by-step
-          tutorial on{" "}
-          <a
-            className="font-semibold underline"
-            href="https://jsmastery.com/course/build-launch-your-saas-in-under-7-days"
-          >
-            JS Mastery Pro
-          </a>{" "}
-          to learn how to set up your Clerk and Supabase accounts.
-        </p>
-        <p>
-          You can find all the prerequisites and env variables in the Readme.md
-        </p>
+        <div className="flex gap-4 mt-4">
+          <Link href="/apps">
+            <Button size="lg">Get Started</Button>
+          </Link>
+          <Link href="/apps/new">
+            <Button variant="outline" size="lg">Create Your First App</Button>
+          </Link>
+        </div>
       </section>
     </main>
   );
