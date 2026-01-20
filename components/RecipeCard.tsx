@@ -43,10 +43,10 @@ const RecipeCard = ({
   };
 
   return (
-    <div className="flex flex-col gap-4 border p-4 rounded-md shadow-md w-[300px] justify-between">
-      <h2 className="text-xl font-bold">{name}</h2>
+    <div className="glass-strong rounded-2xl p-6 w-[320px] flex flex-col gap-4 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-hot-pink-500/10 group">
+      <h2 className="text-heading font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">{name}</h2>
       <div className="flex flex-col gap-4">
-        <p className="text-sm text-gray-500">{ingredients} ingredients</p>
+        <p className="text-sm text-muted-foreground">{ingredients} ingredients</p>
         <span className="flex items-center gap-2">
           <Image
             src={userImageUrl}
@@ -55,11 +55,11 @@ const RecipeCard = ({
             height={24}
             className="rounded-full"
           />
-          <p className="text-sm text-gray-500">{userName}</p>
+          <p className="text-sm text-muted-foreground">{userName}</p>
         </span>
         {unlocked ? (
           <Link href={`/recipes/${id}`}>
-            <Button className="w-full">View Recipe</Button>
+            <Button variant="glass" className="w-full">View Recipe</Button>
           </Link>
         ) : (
           <Button onClick={() => handleUnlockRecipe(id)} className="w-full">
