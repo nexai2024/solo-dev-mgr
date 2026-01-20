@@ -3,26 +3,6 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-<<<<<<< HEAD
-    <main className="container mx-auto py-16 px-4">
-      <section className="flex flex-col gap-6 max-w-4xl">
-        <h1 className="text-5xl font-bold">Welcome to DevManager</h1>
-        <h2 className="text-2xl font-semibold text-gray-700">
-          Your all-in-one platform for managing indie development projects from idea to production
-        </h2>
-        <p className="text-lg text-gray-600">
-          Track, manage, and monitor the apps you create with comprehensive metadata,
-          environment variables, deployment history, and more. Perfect for solo developers
-          and small teams building custom applications.
-        </p>
-        <div className="flex gap-4 mt-4">
-          <Link href="/apps">
-            <Button size="lg">Get Started</Button>
-          </Link>
-          <Link href="/apps/new">
-            <Button variant="outline" size="lg">Create Your First App</Button>
-          </Link>
-=======
     <main className="relative min-h-screen overflow-hidden p-0 m-0 max-w-none">
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-hero">
@@ -118,7 +98,6 @@ export default function Home() {
             <h3 className="text-heading text-white mb-2">Chef Favorites</h3>
             <p className="text-small text-white/60">Restaurant-quality at home</p>
           </div>
->>>>>>> main
         </div>
       </section>
     </main>
