@@ -243,7 +243,7 @@ export default function Home() {
         <div className="text-center mb-12">
           <h2 className="text-hero text-white mb-4">Loved by Indie Developers</h2>
           <p className="text-body-lg text-white/70 max-w-2xl mx-auto">
-            See what other developers are saying about DevManager
+            See what other developers are saying about Vantage
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -277,7 +277,7 @@ export default function Home() {
               </div>
             </div>
             <p className="text-body text-white/80 mb-4">
-              "As a solo developer, managing deployments and env variables used to be a nightmare. DevManager made it so simple - I can focus on building instead of configuration."
+              "As a solo developer, managing deployments and env variables used to be a nightmare. Vantage made it so simple - I can focus on building instead of configuration."
             </p>
             <div className="flex text-hot-pink-400">
               {"★★★★★".split("").map((star, i) => (
@@ -404,7 +404,7 @@ export default function Home() {
             Ready to Simplify Your Dev Workflow?
           </h2>
           <p className="text-body-lg text-white/70 mb-8 max-w-2xl mx-auto">
-            Join thousands of indie developers who are already using DevManager to streamline their projects.
+            Join thousands of indie developers who are already using Vantage to streamline their projects.
           </p>
           <div className="flex gap-4 justify-center">
             <Link href="/apps">

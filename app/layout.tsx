@@ -12,7 +12,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "DevManager - Modular SaaS Platform for Indie Developers",
+  title: "Vantage - Modular SaaS Platform for Indie Developers",
   description: "Streamline your development workflow with powerful modules designed to make indie dev life easier. Manage deployments, environments, repositories, and more—all in one place.",
 };
 

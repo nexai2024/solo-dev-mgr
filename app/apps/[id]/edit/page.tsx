@@ -60,7 +60,7 @@ const EditAppPage = () => {
     <main className="container mx-auto py-8 px-4">
       <div className="mb-6">
         <nav className="text-sm text-gray-500 mb-4">
-          DevManager / Apps / {app.name} / Edit
+          Vantage / Apps / {app.name} / Edit
         </nav>
         <h1 className="text-3xl font-bold">Edit App</h1>
       </div>
