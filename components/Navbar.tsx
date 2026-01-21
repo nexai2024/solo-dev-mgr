@@ -11,6 +11,7 @@ const Navbar = () => {
       </Link>
       <div className="flex gap-4 items-center">
         <Link href="/apps">My Apps</Link>
+        <Link href="/blue-ocean">Blue Ocean</Link>
         <Link href="/subscription">Subscriptions</Link>
         <SignedOut>
           <SignInButton>
