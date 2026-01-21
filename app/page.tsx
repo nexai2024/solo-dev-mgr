@@ -21,6 +21,9 @@ export default function Home() {
           <Link href="/apps/new">
             <Button variant="outline" size="lg">Create Your First App</Button>
           </Link>
+          <Link href="/blue-ocean">
+            <Button variant="outline" size="lg" className="bg-blue-50 hover:bg-blue-100">Blue Ocean Strategy</Button>
+          </Link>
         </div>
       </section>
     </main>
