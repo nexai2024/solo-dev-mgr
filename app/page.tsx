@@ -14,7 +14,7 @@ export default function Home() {
           environment variables, deployment history, and more. Perfect for solo developers
           and small teams building custom applications.
         </p>
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4 mt-4 flex-wrap">
           <Link href="/apps">
             <Button size="lg">Get Started</Button>
           </Link>
@@ -23,6 +23,9 @@ export default function Home() {
           </Link>
           <Link href="/blue-ocean">
             <Button variant="outline" size="lg" className="bg-blue-50 hover:bg-blue-100">Blue Ocean Strategy</Button>
+          </Link>
+          <Link href="/marketing">
+            <Button variant="outline" size="lg" className="bg-purple-50 hover:bg-purple-100">Marketing Automation</Button>
           </Link>
         </div>
       </section>
