@@ -132,12 +132,12 @@ export function NewAnalysisClient({ apps }: NewAnalysisClientProps) {
             {apps.length > 0 && (
               <div>
                 <Label htmlFor="app_id">Link to Existing App (Optional)</Label>
-                <Select onValueChange={(value) => setValue("app_id", value)}>
+                <Select onValueChange={(value) => setValue("app_id", value === "none" ? undefined : value)}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select app..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {apps.map((app) => (
                       <SelectItem key={app.id} value={app.id}>
                         {app.name}

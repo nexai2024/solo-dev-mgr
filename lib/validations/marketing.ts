@@ -191,7 +191,7 @@ export const createCommunityCommentSchema = z.object({
 export const updateCommunityCommentSchema = createCommunityCommentSchema.partial().omit({ marketing_app_id: true, platform_comment_id: true });
 
 // Referral Program validation
-export const createReferralProgramSchema = z.object({
+const referralProgramBaseSchema = z.object({
   marketing_app_id: z.string().uuid('Invalid marketing app ID'),
   name: z.string().min(1, 'Name is required').max(200),
   description: z.string().max(1000).optional().nullable(),
@@ -200,7 +200,9 @@ export const createReferralProgramSchema = z.object({
   is_active: z.boolean().default(true),
   start_date: z.string().datetime().optional().nullable(),
   end_date: z.string().datetime().optional().nullable(),
-}).refine((data) => {
+});
+
+export const createReferralProgramSchema = referralProgramBaseSchema.refine((data) => {
   if (data.start_date && data.end_date) {
     return new Date(data.start_date) < new Date(data.end_date);
   }
@@ -210,7 +212,7 @@ export const createReferralProgramSchema = z.object({
   path: ['end_date'],
 });
 
-export const updateReferralProgramSchema = createReferralProgramSchema.partial().omit({ marketing_app_id: true });
+export const updateReferralProgramSchema = referralProgramBaseSchema.partial().omit({ marketing_app_id: true });
 
 // Referral Link validation
 export const createReferralLinkSchema = z.object({
@@ -259,7 +261,7 @@ export const createPricingTierSchema = z.object({
 export const updatePricingTierSchema = createPricingTierSchema.partial().omit({ marketing_app_id: true });
 
 // Offer validation
-export const createOfferSchema = z.object({
+const offerBaseSchema = z.object({
   marketing_app_id: z.string().uuid('Invalid marketing app ID'),
   pricing_tier_id: z.string().uuid('Invalid pricing tier ID').optional().nullable(),
   name: z.string().min(1, 'Name is required').max(200),
@@ -271,7 +273,9 @@ export const createOfferSchema = z.object({
   max_redemptions: z.number().min(1).optional().nullable(),
   promo_code: z.string().max(50).regex(/^[A-Z0-9-_]+$/, 'Promo code must be uppercase alphanumeric').optional().nullable(),
   is_active: z.boolean().default(true),
-}).refine((data) => {
+});
+
+export const createOfferSchema = offerBaseSchema.refine((data) => {
   if (data.start_date && data.end_date) {
     return new Date(data.start_date) < new Date(data.end_date);
   }
@@ -281,7 +285,7 @@ export const createOfferSchema = z.object({
   path: ['end_date'],
 });
 
-export const updateOfferSchema = createOfferSchema.partial().omit({ marketing_app_id: true });
+export const updateOfferSchema = offerBaseSchema.partial().omit({ marketing_app_id: true });
 
 // Abandoned Cart validation
 export const createAbandonedCartSchema = z.object({
@@ -460,14 +464,16 @@ export const createPromoNetworkListingSchema = z.object({
 export const updatePromoNetworkListingSchema = createPromoNetworkListingSchema.partial().omit({ marketing_app_id: true });
 
 // Promo Partnership validation
-export const createPromoPartnershipSchema = z.object({
+const promoPartnershipBaseSchema = z.object({
   requester_listing_id: z.string().uuid('Invalid requester listing ID'),
   partner_listing_id: z.string().uuid('Invalid partner listing ID'),
   status: z.enum(['pending', 'accepted', 'declined', 'completed', 'cancelled']).default('pending'),
   promo_start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional().nullable(),
   promo_end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (YYYY-MM-DD)').optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
-}).refine((data) => {
+});
+
+export const createPromoPartnershipSchema = promoPartnershipBaseSchema.refine((data) => {
   if (data.promo_start_date && data.promo_end_date) {
     return data.promo_start_date < data.promo_end_date;
   }
@@ -480,7 +486,7 @@ export const createPromoPartnershipSchema = z.object({
   path: ['partner_listing_id'],
 });
 
-export const updatePromoPartnershipSchema = createPromoPartnershipSchema.partial().omit({ requester_listing_id: true, partner_listing_id: true });
+export const updatePromoPartnershipSchema = promoPartnershipBaseSchema.partial().omit({ requester_listing_id: true, partner_listing_id: true });
 
 // ============================================================================
 // AI & MARKETING VALIDATION SCHEMAS

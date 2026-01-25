@@ -7,7 +7,6 @@ import { createSupabaseClient } from "../supabase";
 // Get all apps for current user
 export const getApps = async (): Promise<App[]> => {
   const { userId } = await auth();
-
   if (!userId) return [];
 
   const supabase = createSupabaseClient();
