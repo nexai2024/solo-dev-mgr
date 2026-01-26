@@ -1,0 +1,44 @@
+meta {
+  name: Track Referral Click
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/marketing/public/referral/track?code={{referralCode}}&utm_source=twitter&utm_campaign=launch
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: in [200, 302]
+}
+
+tests {
+  test("should redirect or return success", function() {
+    expect([200, 302]).to.include(res.status);
+  });
+}
+
+docs {
+  # Referral Tracking
+
+  Tracks referral link clicks and redirects to landing page.
+  Used for viral growth and affiliate tracking.
+
+  **Required Query Params:**
+  - code: Unique referral code
+
+  **Optional Query Params:**
+  - utm_source: Traffic source
+  - utm_medium: Marketing medium
+  - utm_campaign: Campaign name
+
+  **Behavior:**
+  - Increments click count for referral code
+  - Creates tracking record in database
+  - Redirects (302) to landing page with tracking params
+
+  **Note:** Update `referralCode` variable in environment
+  with a valid code from your database.
+}

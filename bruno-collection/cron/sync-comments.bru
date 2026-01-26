@@ -1,0 +1,65 @@
+meta {
+  name: Sync Comments from Platforms
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/marketing/cron/sync-comments
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cronSecret}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+tests {
+  test("should sync comments from all platforms", function() {
+    expect(res.body).to.have.property('synced');
+    expect(res.body).to.have.property('total');
+  });
+
+  test("should return platform breakdown", function() {
+    expect(res.body.synced).to.be.an('object');
+  });
+}
+
+docs {
+  # Sync Comments from All Platforms (Cron Job)
+
+  **Frequency:** Runs every 15 minutes (via cron scheduler)
+
+  **Purpose:** Aggregates comments/mentions from all social
+  platforms into unified dashboard.
+
+  **Authentication:** Requires CRON_SECRET in Authorization header
+
+  **Behavior:**
+  - Fetches comments/mentions from Twitter, Reddit, YouTube, TikTok
+  - Stores in unified `comments` table
+  - Runs sentiment analysis on each comment (AI)
+  - Detects spam/toxic comments
+
+  **Expected Response:**
+  ```json
+  {
+    "success": true,
+    "synced": {
+      "twitter": 15,
+      "reddit": 8,
+      "youtube": 12,
+      "tiktok": 5
+    },
+    "total": 40,
+    "message": "Synced 40 comments across 4 platforms"
+  }
+  ```
+
+  **Note:** Platforms must be connected via OAuth first
+}

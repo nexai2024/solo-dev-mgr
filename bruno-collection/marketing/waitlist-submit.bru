@@ -1,0 +1,65 @@
+meta {
+  name: Submit to Waitlist
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/marketing/public/waitlist?app_id={{appId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{testEmail}}",
+    "name": "Test User",
+    "referral_source": "organic"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+tests {
+  test("should return success message", function() {
+    expect(res.body.message).to.include("check your email");
+  });
+
+  test("response time should be under 1000ms", function() {
+    expect(res.responseTime).to.be.below(1000);
+  });
+}
+
+docs {
+  # Waitlist Submission
+
+  Public endpoint for waitlist submission with double opt-in.
+  No authentication required.
+
+  **Required Query Params:**
+  - app_id: Marketing app ID
+
+  **Request Body:**
+  - email (required): Valid email address
+  - name (optional): User's name
+  - referral_source (optional): How they found us
+
+  **Response:**
+  - 200: Success, confirmation email sent
+  - 400: Validation error
+
+  **Expected Response:**
+  ```json
+  {
+    "success": true,
+    "message": "Please check your email to confirm your subscription"
+  }
+  ```
+}
