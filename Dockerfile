@@ -22,6 +22,12 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Set placeholder environment variables for build-time to prevent initialization errors
+# Real values will be provided at runtime via Kubernetes secrets
+ENV RESEND_API_KEY=placeholder
+ENV UPSTASH_REDIS_REST_URL=https://placeholder.upstash.io
+ENV UPSTASH_REDIS_REST_TOKEN=placeholder
+
 RUN npm run build
 
 # Production image, copy all the files and run next
