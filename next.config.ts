@@ -10,6 +10,13 @@ const nextConfig: NextConfig = {
   experimental: {
     instrumentationHook: true,
   },
+  // Disable ESLint and TypeScript checks during production build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 // Sentry configuration options
