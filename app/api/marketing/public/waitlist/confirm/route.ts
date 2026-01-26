@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
+import { withRateLimit, confirmationEndpointLimiter } from '@/lib/rate-limit';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Public API: Confirm waitlist email
  * GET /api/marketing/public/waitlist/confirm?token=xxx
+ * Rate limit: 3 requests per 60 seconds per IP
  */
-export async function GET(request: Request) {
+async function handleGET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const token = url.searchParams.get('token');
@@ -97,7 +100,20 @@ export async function GET(request: Request) {
       }
     );
   } catch (error: any) {
+    // Capture error to Sentry with context
+    Sentry.captureException(error, {
+      tags: { endpoint: 'waitlist-confirm' },
+      extra: { token: request.url }
+    });
+
     console.error('Waitlist confirmation error:', error);
     return new NextResponse('Confirmation failed', { status: 500 });
   }
 }
+
+// Export rate-limited handler
+export const GET = withRateLimit(
+  confirmationEndpointLimiter,
+  handleGET,
+  "Too many confirmation attempts, please wait"
+);

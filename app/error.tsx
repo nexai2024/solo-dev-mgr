@@ -1,63 +1,91 @@
-'use client';
-import React from "react";
+"use client";
+
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
-import { Metadata } from "next";
-import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
-export const metadata: Metadata = {
-  title: "Next.js Error | TailAdmin - Next.js Dashboard Template",
-  description:
-    "This is Next.js Error page for TailAdmin - Next.js Tailwind CSS Admin Dashboard Template",
-};
+/**
+ * Global Error Boundary
+ *
+ * Catches all unhandled errors in the application and displays a user-friendly error page.
+ * Automatically sends error details to Sentry for monitoring and debugging.
+ *
+ * Learn more: https://nextjs.org/docs/app/building-your-application/routing/error-handling
+ */
 
-const ErrorPage: React.FC = () => {
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log error to Sentry
+    Sentry.captureException(error);
+  }, [error]);
+
   return (
-    <DefaultLayout>
-      <Breadcrumb pageName="Error Page" />
+    <html>
+      <body>
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 px-4">
+          <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
+            <div className="mb-6 flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                <svg
+                  className="h-8 w-8 text-red-600"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+            </div>
 
-      <div className="rounded-sm border border-stroke bg-white px-5 py-10 shadow-default dark:border-strokedark dark:bg-boxdark sm:py-20">
-        <div className="mx-auto max-w-[410px]">
-          <Image
-            src={"/images/illustration/illustration-01.svg"}
-            alt="illustration"
-            width={400}
-            height={400}
-          />
+            <h1 className="mb-2 text-center text-2xl font-bold text-gray-900">
+              Something went wrong
+            </h1>
 
-          <div className="mt-7.5 text-center">
-            <h2 className="mb-3 text-2xl font-bold text-black dark:text-white">
-              Sorry, the page can’t be found
-            </h2>
-            <p className="font-medium">
-              The page you were looking for appears to have been moved, deleted
-              or does not exist.
+            <p className="mb-6 text-center text-gray-600">
+              We've been notified and are working on a fix. Please try again.
             </p>
-            <Link
-              href="/"
-              className="mt-7.5 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 font-medium text-white hover:bg-opacity-90"
-            >
-              <svg
-                className="fill-current"
-                width="16"
-                height="14"
-                viewBox="0 0 16 14"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+
+            {process.env.NODE_ENV === "development" && (
+              <div className="mb-6 rounded-md bg-gray-100 p-4">
+                <p className="text-sm font-mono text-gray-700 break-words">
+                  {error.message}
+                </p>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={reset}
+                className="w-full rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700 transition-colors"
               >
-                <path
-                  d="M14.7492 6.38125H2.73984L7.52109 1.51562C7.77422 1.2625 7.77422 0.86875 7.52109 0.615625C7.26797 0.3625 6.87422 0.3625 6.62109 0.615625L0.799219 6.52187C0.546094 6.775 0.546094 7.16875 0.799219 7.42188L6.62109 13.3281C6.73359 13.4406 6.90234 13.525 7.07109 13.525C7.23984 13.525 7.38047 13.4687 7.52109 13.3562C7.77422 13.1031 7.77422 12.7094 7.52109 12.4563L2.76797 7.64687H14.7492C15.0867 7.64687 15.368 7.36562 15.368 7.02812C15.368 6.6625 15.0867 6.38125 14.7492 6.38125Z"
-                  fill=""
-                />
-              </svg>
-              <span>Back to Home</span>
-            </Link>
+                Try again
+              </button>
+
+              <Link
+                href="/"
+                className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-center text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Go to homepage
+              </Link>
+            </div>
+
+            {error.digest && (
+              <p className="mt-4 text-center text-xs text-gray-500">
+                Error ID: {error.digest}
+              </p>
+            )}
           </div>
         </div>
-      </div>
-    </DefaultLayout>
+      </body>
+    </html>
   );
-};
-
-export default ErrorPage;
+}

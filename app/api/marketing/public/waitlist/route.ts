@@ -1,16 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
 import { publicWaitlistSubmitSchema } from '@/lib/validations/marketing';
 import { randomBytes } from 'crypto';
 import { Resend } from 'resend';
+import { withRateLimit, publicEndpointLimiter } from '@/lib/rate-limit';
+import * as Sentry from '@sentry/nextjs';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
  * Public API: Submit to waitlist
  * POST /api/marketing/public/waitlist
+ * Rate limit: 5 requests per 60 seconds per IP
  */
-export async function POST(request: Request) {
+async function handlePOST(request: NextRequest) {
   try {
     const body = await request.json();
 
@@ -113,10 +116,26 @@ export async function POST(request: Request) {
       },
     });
   } catch (error: any) {
+    // Capture error to Sentry with context
+    const eventId = Sentry.captureException(error, {
+      tags: { endpoint: 'waitlist' },
+      extra: { body: await request.json().catch(() => ({})) }
+    });
+
     console.error('Waitlist submission error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to subscribe' },
+      {
+        error: error.message || 'Failed to subscribe',
+        errorId: eventId
+      },
       { status: 500 }
     );
   }
 }
+
+// Export rate-limited handler
+export const POST = withRateLimit(
+  publicEndpointLimiter,
+  handlePOST,
+  "Too many requests, please try again in 1 minute"
+);

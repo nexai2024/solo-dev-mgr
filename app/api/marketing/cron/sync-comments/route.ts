@@ -1,15 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
 import { aggregateCommentsFromPlatforms } from '@/lib/actions/marketing-external-apis.actions';
 import { analyzeSentiment } from '@/lib/actions/marketing-ai.actions';
+import { withRateLimit, cronEndpointLimiter } from '@/lib/rate-limit';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Cron job to sync comments from all platforms
  * Triggered every 15 minutes
+ * Rate limit: 10 requests per 60 seconds per IP (secondary protection)
  */
-export async function GET(request: Request) {
+async function handleGET(request: NextRequest) {
   try {
-    // Verify cron secret
+    // Verify cron secret (primary authentication)
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -111,7 +114,15 @@ export async function GET(request: Request) {
       appsProcessed: Object.keys(appAccounts).length,
     });
   } catch (error: any) {
+    Sentry.captureException(error, { tags: { endpoint: 'cron-sync-comments', type: 'cron' } });
     console.error('Sync comments cron error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// Export rate-limited handler
+export const GET = withRateLimit(
+  cronEndpointLimiter,
+  handleGET,
+  "Rate limit exceeded"
+);
