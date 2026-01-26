@@ -28,6 +28,9 @@ ENV RESEND_API_KEY=placeholder
 ENV UPSTASH_REDIS_REST_URL=https://placeholder.upstash.io
 ENV UPSTASH_REDIS_REST_TOKEN=placeholder
 
+# Skip pre-rendering static pages that require runtime data
+ENV NEXT_SKIP_STATIC_GENERATION=true
+
 RUN npm run build
 
 # Production image, copy all the files and run next
