@@ -1,0 +1,55 @@
+meta {
+  name: Send Recovery Emails
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/marketing/cron/send-recovery-emails
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cronSecret}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+tests {
+  test("should send recovery emails", function() {
+    expect(res.body).to.have.property('sent');
+    expect(res.body.sent).to.be.a('number');
+  });
+}
+
+docs {
+  # Send Recovery Emails (Cron Job)
+
+  **Frequency:** Runs hourly (via cron scheduler)
+
+  **Purpose:** Sends abandoned cart emails for incomplete
+  pricing offers (cart abandonment recovery).
+
+  **Authentication:** Requires CRON_SECRET in Authorization header
+
+  **Behavior:**
+  - Fetches incomplete offers (started checkout, didn't complete)
+  - Sends personalized recovery email with discount code
+  - Updates offer status to `recovery_sent`
+  - Only sends once per offer
+
+  **Expected Response:**
+  ```json
+  {
+    "success": true,
+    "sent": 12,
+    "message": "Sent 12 recovery emails"
+  }
+  ```
+
+  **Email Template:** Uses React Email template with personalized content
+}

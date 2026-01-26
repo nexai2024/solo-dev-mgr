@@ -1,0 +1,40 @@
+meta {
+  name: Confirm Waitlist Email
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/marketing/public/waitlist/confirm?token={{confirmationToken}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+tests {
+  test("should confirm email successfully", function() {
+    expect(res.body.message).to.include("confirmed");
+  });
+}
+
+docs {
+  # Waitlist Email Confirmation
+
+  Confirms email address from verification email link.
+  Token is sent via email after waitlist submission.
+
+  **Required Query Params:**
+  - token: Confirmation token from email
+
+  **Response:**
+  - 200: Email confirmed successfully
+  - 400: Invalid or expired token
+
+  **Note:** You need to get the token from the confirmation email
+  sent after waitlist submission. Update the `confirmationToken`
+  variable in your environment with the actual token.
+}

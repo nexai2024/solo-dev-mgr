@@ -1,0 +1,503 @@
+{
+  "info": {
+    "name": "Solo Dev Manager API",
+    "_postman_id": "solo-dev-mgr-api-collection",
+    "description": "Complete API collection for Solo Dev Manager platform. Includes public marketing endpoints and cron job endpoints for testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "CRON_SECRET",
+      "value": "your-cron-secret-here",
+      "type": "string"
+    },
+    {
+      "key": "appId",
+      "value": "your-marketing-app-id",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "test@example.com",
+      "type": "string"
+    },
+    {
+      "key": "confirmationToken",
+      "value": "token-from-email",
+      "type": "string"
+    },
+    {
+      "key": "referralCode",
+      "value": "FRIEND2024",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Marketing - Public Endpoints",
+      "item": [
+        {
+          "name": "Submit to Waitlist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success field\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "});",
+                  "",
+                  "pm.test(\"Response has message\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "    pm.expect(jsonData.message).to.include('email');",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is less than 1000ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"name\": \"Test User\",\n  \"referral_source\": \"organic\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/marketing/public/waitlist?app_id={{appId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "marketing", "public", "waitlist"],
+              "query": [
+                {
+                  "key": "app_id",
+                  "value": "{{appId}}"
+                }
+              ]
+            },
+            "description": "Submit email to waitlist with double opt-in flow. No authentication required."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test@example.com\",\n  \"name\": \"Test User\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/marketing/public/waitlist?app_id={{appId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "marketing", "public", "waitlist"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Please check your email to confirm your subscription\"\n}"
+            },
+            {
+              "name": "Error - Invalid Email",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"invalid-email\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/marketing/public/waitlist?app_id={{appId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "marketing", "public", "waitlist"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": false,\n  \"error\": \"Invalid email address\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Confirm Waitlist Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Email confirmed successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.message).to.include('confirmed');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/marketing/public/waitlist/confirm?token={{confirmationToken}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "marketing", "public", "waitlist", "confirm"],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "{{confirmationToken}}",
+                  "description": "Confirmation token from email"
+                }
+              ]
+            },
+            "description": "Confirm email address from verification email link. Token is sent via email after waitlist submission."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/marketing/public/waitlist/confirm?token=valid-token",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "marketing", "public", "waitlist", "confirm"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Email confirmed! You're on the waitlist.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Track Referral Click",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 or 302\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 302]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response time is acceptable\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/marketing/public/referral/track?code={{referralCode}}&utm_source=twitter&utm_campaign=launch",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "marketing", "public", "referral", "track"],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "{{referralCode}}",
+                  "description": "Unique referral code"
+                },
+                {
+                  "key": "utm_source",
+                  "value": "twitter",
+                  "description": "Traffic source (optional)"
+                },
+                {
+                  "key": "utm_campaign",
+                  "value": "launch",
+                  "description": "Campaign name (optional)"
+                }
+              ]
+            },
+            "description": "Track referral link clicks and redirect to landing page. Used for viral growth and affiliate tracking."
+          },
+          "response": []
+        }
+      ],
+      "description": "Public-facing marketing API endpoints. No authentication required."
+    },
+    {
+      "name": "Cron Jobs (Protected)",
+      "item": [
+        {
+          "name": "Publish Scheduled Posts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has published count\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('published');",
+                  "    pm.expect(jsonData.published).to.be.a('number');",
+                  "});",
+                  "",
+                  "pm.test(\"Response has success message\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData).to.have.property('message');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{CRON_SECRET}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/marketing/cron/publish-scheduled-posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "marketing", "cron", "publish-scheduled-posts"]
+            },
+            "description": "Publishes social media posts that are scheduled for current time. Runs every 5 minutes via cron scheduler. Requires CRON_SECRET authentication."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/marketing/cron/publish-scheduled-posts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "marketing", "cron", "publish-scheduled-posts"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"published\": 3,\n  \"message\": \"Published 3 scheduled posts\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sync Comments from Platforms",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has synced data\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('synced');",
+                  "    pm.expect(jsonData).to.have.property('total');",
+                  "});",
+                  "",
+                  "pm.test(\"Synced data is object\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.synced).to.be.an('object');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{CRON_SECRET}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/marketing/cron/sync-comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "marketing", "cron", "sync-comments"]
+            },
+            "description": "Aggregates comments/mentions from all social platforms. Runs every 15 minutes. Stores in unified comments table with sentiment analysis."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/marketing/cron/sync-comments",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "marketing", "cron", "sync-comments"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"synced\": {\n    \"twitter\": 15,\n    \"reddit\": 8,\n    \"youtube\": 12,\n    \"tiktok\": 5\n  },\n  \"total\": 40,\n  \"message\": \"Synced 40 comments across 4 platforms\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send Recovery Emails",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has sent count\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('sent');",
+                  "    pm.expect(jsonData.sent).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{CRON_SECRET}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/marketing/cron/send-recovery-emails",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "marketing", "cron", "send-recovery-emails"]
+            },
+            "description": "Sends abandoned cart emails for incomplete pricing offers. Runs hourly. Sends personalized recovery email with discount code."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/marketing/cron/send-recovery-emails",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "marketing", "cron", "send-recovery-emails"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"sent\": 12,\n  \"message\": \"Sent 12 recovery emails\"\n}"
+            }
+          ]
+        }
+      ],
+      "description": "Cron job endpoints protected with CRON_SECRET. Used for automated background tasks.",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{CRON_SECRET}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "API Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Check if API is running and responding."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

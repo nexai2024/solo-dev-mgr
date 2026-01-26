@@ -1,0 +1,59 @@
+meta {
+  name: Publish Scheduled Posts
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/marketing/cron/publish-scheduled-posts
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{cronSecret}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.success: eq true
+}
+
+tests {
+  test("should publish scheduled posts", function() {
+    expect(res.body).to.have.property('published');
+    expect(res.body.published).to.be.a('number');
+  });
+
+  test("should return message", function() {
+    expect(res.body.message).to.be.a('string');
+  });
+}
+
+docs {
+  # Publish Scheduled Posts (Cron Job)
+
+  **Frequency:** Runs every 5 minutes (via cron scheduler)
+
+  **Purpose:** Publishes social media posts that are scheduled
+  for the current time.
+
+  **Authentication:** Requires CRON_SECRET in Authorization header
+
+  **Behavior:**
+  - Fetches posts with `scheduled_for <= NOW()` and `status = 'scheduled'`
+  - Publishes to each platform (Twitter, Reddit, TikTok, Discord)
+  - Updates status to `published` or `failed`
+  - Logs any errors
+
+  **Expected Response:**
+  ```json
+  {
+    "success": true,
+    "published": 3,
+    "message": "Published 3 scheduled posts"
+  }
+  ```
+
+  **Testing:** Can be manually triggered to test scheduled post logic
+}
