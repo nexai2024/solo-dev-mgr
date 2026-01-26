@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.0.10",
+    "@ai-sdk/openai": "^1.0.10",
     "@anthropic-ai/sdk": "^0.71.2",
     "@clerk/backend": "^1.33.1",
     "@clerk/nextjs": "^6.20.0",
@@ -45,6 +47,7 @@
     "resend": "^6.8.0",
     "sharp": "^0.34.5",
     "snoowrap": "^1.23.0",
+    "sonner": "^1.7.1",
     "tailwind-merge": "^3.3.0",
     "twitter-api-v2": "^1.29.0",
     "zod": "^3.25.32"
