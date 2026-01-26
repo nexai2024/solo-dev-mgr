@@ -3,6 +3,9 @@ import { createSupabaseClient } from '@/lib/supabase';
 import { withRateLimit, confirmationEndpointLimiter } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';
 
+// Force dynamic rendering to avoid build-time errors
+export const dynamic = 'force-dynamic';
+
 /**
  * Public API: Confirm waitlist email
  * GET /api/marketing/public/waitlist/confirm?token=xxx

@@ -6,6 +6,9 @@ import * as Sentry from '@sentry/nextjs';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Force dynamic rendering to avoid build-time errors
+export const dynamic = 'force-dynamic';
+
 /**
  * Cron job to send cart abandonment recovery emails
  * Triggered every hour

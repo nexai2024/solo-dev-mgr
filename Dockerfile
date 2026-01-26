@@ -27,9 +27,22 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV RESEND_API_KEY=placeholder
 ENV UPSTASH_REDIS_REST_URL=https://placeholder.upstash.io
 ENV UPSTASH_REDIS_REST_TOKEN=placeholder
-
-# Skip pre-rendering static pages that require runtime data
-ENV NEXT_SKIP_STATIC_GENERATION=true
+ENV CRON_SECRET=placeholder
+ENV RESEND_FROM_EMAIL=noreply@placeholder.com
+ENV NEXT_PUBLIC_APP_URL=https://placeholder.com
+ENV NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
+ENV SUPABASE_SERVICE_ROLE_KEY=placeholder
+ENV ANTHROPIC_API_KEY=placeholder
+ENV TWITTER_API_KEY=placeholder
+ENV TWITTER_API_SECRET=placeholder
+ENV REDDIT_USER_AGENT=placeholder
+ENV REDDIT_CLIENT_ID=placeholder
+ENV REDDIT_CLIENT_SECRET=placeholder
+ENV SENTRY_DSN=placeholder
+ENV NEXT_PUBLIC_SENTRY_DSN=placeholder
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=placeholder
+ENV CLERK_SECRET_KEY=placeholder
 
 RUN npm run build
 

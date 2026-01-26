@@ -4,6 +4,9 @@ import { publishToMultiplePlatforms } from '@/lib/actions/marketing-external-api
 import { withRateLimit, cronEndpointLimiter } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';
 
+// Force dynamic rendering to avoid build-time errors
+export const dynamic = 'force-dynamic';
+
 /**
  * Cron job to publish scheduled social posts
  * Triggered every 5 minutes

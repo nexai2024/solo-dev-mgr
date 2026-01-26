@@ -3,6 +3,9 @@ import { trackReferralClick } from '@/lib/actions/marketing.actions';
 import { withRateLimit, publicEndpointLimiter } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';
 
+// Force dynamic rendering to avoid build-time errors with server actions
+export const dynamic = 'force-dynamic';
+
 /**
  * Public API: Track referral click
  * GET /api/marketing/public/referral/track?code=xxx

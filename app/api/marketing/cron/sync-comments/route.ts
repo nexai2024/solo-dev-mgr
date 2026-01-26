@@ -5,6 +5,9 @@ import { analyzeSentiment } from '@/lib/actions/marketing-ai.actions';
 import { withRateLimit, cronEndpointLimiter } from '@/lib/rate-limit';
 import * as Sentry from '@sentry/nextjs';
 
+// Force dynamic rendering to avoid build-time errors
+export const dynamic = 'force-dynamic';
+
 /**
  * Cron job to sync comments from all platforms
  * Triggered every 15 minutes
