@@ -1,5 +1,10 @@
 "use server";
 
+import snoowrap from "snoowrap";
+import * as appStore from "app-store-scraper";
+import * as gPlay from "google-play-scraper";
+import * as Sentry from "@sentry/nextjs";
+
 // External API integrations for pain point discovery
 // Reddit, Product Hunt, and App Store scraping
 
@@ -34,26 +39,48 @@ export const searchRedditPainPoints = async (
   keywords: string[],
   limit: number = 50
 ): Promise<RedditPainPoint[]> => {
-  // TODO: Implement actual Reddit API integration
-  // Reddit JSON API: https://www.reddit.com/r/{subreddit}/search.json
-  // For now, return mock data
+  try {
+    // Initialize snoowrap client with credentials
+    const reddit = new snoowrap({
+      userAgent: process.env.REDDIT_USER_AGENT || "SoloDevMgr/1.0.0",
+      clientId: process.env.REDDIT_CLIENT_ID!,
+      clientSecret: process.env.REDDIT_CLIENT_SECRET!,
+      username: "", // Client credentials flow (read-only)
+      password: "",
+    });
 
-  console.log(`Searching Reddit r/${subreddit} for keywords: ${keywords.join(", ")}`);
+    // Search subreddit with keywords
+    const query = keywords.join(" OR ");
+    const searchResults = await reddit
+      .getSubreddit(subreddit)
+      .search({
+        query,
+        time: "month" as any,
+        sort: "relevance" as any,
+        limit,
+      });
 
-  return [
-    {
-      content: "I hate how complicated the setup process is. Took me 3 hours just to get started!",
-      url: `https://reddit.com/r/${subreddit}/comments/example1`,
-      score: 42,
-      created: new Date().toISOString(),
-    },
-    {
-      content: "Why don't they offer a simple pricing tier? I don't need all these features.",
-      url: `https://reddit.com/r/${subreddit}/comments/example2`,
-      score: 28,
-      created: new Date().toISOString(),
-    },
-  ];
+    // Map to RedditPainPoint format
+    const painPoints: RedditPainPoint[] = searchResults.map((post: any) => ({
+      content: post.title + (post.selftext ? `\n\n${post.selftext}` : ""),
+      url: `https://reddit.com${post.permalink}`,
+      score: post.score,
+      created: new Date(post.created_utc * 1000).toISOString(),
+    }));
+
+    return painPoints;
+  } catch (error) {
+    // Log to Sentry
+    Sentry.captureException(error, {
+      tags: { function: "searchRedditPainPoints" },
+      extra: { subreddit, keywords },
+    });
+
+    console.error("Reddit API error:", error);
+
+    // Return empty array on failure (graceful degradation)
+    return [];
+  }
 };
 
 // ========== PRODUCT HUNT API ==========
@@ -63,9 +90,10 @@ export const searchProductHuntProducts = async (
   category: string,
   keywords: string[]
 ): Promise<ProductHuntReview[]> => {
-  // TODO: Implement actual Product Hunt GraphQL API integration
-  // Requires: PRODUCT_HUNT_API_TOKEN env variable
-  // For now, return mock data
+  // NOTE: Product Hunt GraphQL API requires OAuth authentication which is beyond MVP scope.
+  // For now, returning mock data. Consider upgrading to paid API access or alternative source.
+  // Alternative: Web scraping with Cheerio (against TOS, not recommended)
+  // TODO: Implement when Product Hunt API access is available
 
   console.log(`Searching Product Hunt category: ${category} for keywords: ${keywords.join(", ")}`);
 
@@ -93,29 +121,47 @@ export const scrapeIosAppReviews = async (
   country: string = "us",
   limit: number = 100
 ): Promise<AppStoreReview[]> => {
-  // TODO: Implement actual iOS scraping with app-store-scraper package
-  // For now, return mock data
+  try {
+    // Fetch reviews using app-store-scraper
+    const reviews = await appStore.reviews({
+      appId,
+      country,
+      sort: appStore.sort.RECENT,
+      page: 1,
+    });
 
-  console.log(`Scraping iOS App Store reviews for app: ${appId}, country: ${country}`);
+    // Get app metadata for app name
+    let appName = "Unknown App";
+    try {
+      const appDetails = await appStore.app({ appId, country });
+      appName = appDetails.title || appName;
+    } catch (appError) {
+      console.warn("Failed to fetch app name:", appError);
+    }
 
-  return [
-    {
-      content: "App crashes frequently on iPad. Please fix this bug!",
-      rating: 2,
-      userName: "User123",
-      date: new Date().toISOString(),
-      appName: "Example App",
+    // Map to AppStoreReview format
+    const mappedReviews: AppStoreReview[] = reviews.slice(0, limit).map((review: any) => ({
+      content: review.text,
+      rating: review.score,
+      userName: review.userName || "Anonymous",
+      date: new Date(review.date).toISOString(),
+      appName,
       platform: "ios",
-    },
-    {
-      content: "Good app but needs dark mode support.",
-      rating: 4,
-      userName: "User456",
-      date: new Date().toISOString(),
-      appName: "Example App",
-      platform: "ios",
-    },
-  ];
+    }));
+
+    return mappedReviews;
+  } catch (error) {
+    // Log to Sentry
+    Sentry.captureException(error, {
+      tags: { function: "scrapeIosAppReviews" },
+      extra: { appId, country },
+    });
+
+    console.error("iOS App Store scraping error:", error);
+
+    // Return empty array on failure (graceful degradation)
+    return [];
+  }
 };
 
 // Scrape Android Play Store reviews
@@ -124,29 +170,48 @@ export const scrapeAndroidAppReviews = async (
   country: string = "us",
   limit: number = 100
 ): Promise<AppStoreReview[]> => {
-  // TODO: Implement actual Android scraping with google-play-scraper package
-  // For now, return mock data
+  try {
+    // Fetch reviews using google-play-scraper
+    const reviewsResult = await gPlay.reviews({
+      appId,
+      lang: "en",
+      country,
+      sort: gPlay.sort.NEWEST,
+      num: limit,
+    });
 
-  console.log(`Scraping Google Play Store reviews for app: ${appId}, country: ${country}`);
+    // Get app metadata for app name
+    let appName = "Unknown App";
+    try {
+      const appDetails = await gPlay.app({ appId, lang: "en", country });
+      appName = appDetails.title || appName;
+    } catch (appError) {
+      console.warn("Failed to fetch app name:", appError);
+    }
 
-  return [
-    {
-      content: "Battery drain is terrible after the last update.",
-      rating: 1,
-      userName: "AndroidUser1",
-      date: new Date().toISOString(),
-      appName: "Example App",
+    // Map to AppStoreReview format
+    const mappedReviews: AppStoreReview[] = reviewsResult.data.map((review: any) => ({
+      content: review.text,
+      rating: review.score,
+      userName: review.userName || "Anonymous",
+      date: new Date(review.date).toISOString(),
+      appName,
       platform: "android",
-    },
-    {
-      content: "Works great on my Pixel. Would love offline mode though.",
-      rating: 4,
-      userName: "AndroidUser2",
-      date: new Date().toISOString(),
-      appName: "Example App",
-      platform: "android",
-    },
-  ];
+    }));
+
+    return mappedReviews;
+  } catch (error) {
+    // Log to Sentry
+    Sentry.captureException(error, {
+      tags: { function: "scrapeAndroidAppReviews" },
+      extra: { appId, country },
+    });
+
+    console.error("Google Play Store scraping error:", error);
+
+    // Return empty array on failure (graceful degradation)
+    return [];
+  }
 };
 
 // ========== UNIFIED PAIN POINT DISCOVERY ==========

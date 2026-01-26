@@ -1,14 +1,17 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '@/lib/supabase';
 import { publishToMultiplePlatforms } from '@/lib/actions/marketing-external-apis.actions';
+import { withRateLimit, cronEndpointLimiter } from '@/lib/rate-limit';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Cron job to publish scheduled social posts
  * Triggered every 5 minutes
+ * Rate limit: 10 requests per 60 seconds per IP (secondary protection)
  */
-export async function GET(request: Request) {
+async function handleGET(request: NextRequest) {
   try {
-    // Verify cron secret
+    // Verify cron secret (primary authentication)
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -95,7 +98,19 @@ export async function GET(request: Request) {
       results,
     });
   } catch (error: any) {
+    // Capture error to Sentry with context
+    Sentry.captureException(error, {
+      tags: { endpoint: 'cron-publish-posts', type: 'cron' }
+    });
+
     console.error('Publish scheduled posts cron error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+// Export rate-limited handler
+export const GET = withRateLimit(
+  cronEndpointLimiter,
+  handleGET,
+  "Rate limit exceeded"
+);

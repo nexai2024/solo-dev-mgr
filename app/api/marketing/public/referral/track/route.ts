@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { trackReferralClick } from '@/lib/actions/marketing.actions';
+import { withRateLimit, publicEndpointLimiter } from '@/lib/rate-limit';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Public API: Track referral click
  * GET /api/marketing/public/referral/track?code=xxx
+ * Rate limit: 5 requests per 60 seconds per IP
  */
-export async function GET(request: Request) {
+async function handleGET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const code = url.searchParams.get('code');
@@ -31,7 +34,23 @@ export async function GET(request: Request) {
 
     return response;
   } catch (error: any) {
+    // Capture error to Sentry with context
+    const eventId = Sentry.captureException(error, {
+      tags: { endpoint: 'referral-track' },
+      extra: { code: request.url }
+    });
+
     console.error('Referral tracking error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({
+      error: error.message,
+      errorId: eventId
+    }, { status: 500 });
   }
 }
+
+// Export rate-limited handler
+export const GET = withRateLimit(
+  publicEndpointLimiter,
+  handleGET,
+  "Too many requests, please try again in 1 minute"
+);
